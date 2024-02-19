@@ -97,6 +97,11 @@ class table:
             self.pristine = False
         return self
 
+    def left_join(self, table, on_clause):
+        self.tables = list(self.tables)
+        self.tables[-1] = "%s LEFT JOIN %s ON %s" % (self.tables[-1], table, on_clause)
+        return self
+
     def select(self, *cols):
         self = self.clone_if()
         self.op = "SELECT"
