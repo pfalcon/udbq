@@ -124,7 +124,10 @@ class table:
 
     def where(self, cond=None, *vals, **kwargs):
         self = self.clone_if()
-        self.cond = where(cond, *vals, **kwargs)
+        if self.cond is None:
+            self.cond = where(cond, *vals, **kwargs)
+        else:
+            self.cond.and_(cond, *vals, **kwargs)
         return self
 
     def and_(self, cond=None, *vals, **kwargs):
