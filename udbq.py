@@ -111,6 +111,8 @@ class table:
     def select(self, *cols):
         self = self.clone_if()
         self.op = "SELECT"
+        if not cols:
+            cols = "*"
         self.cols = cols
         return self
 
