@@ -184,6 +184,9 @@ class Model:
     def __getitem__(self, a):
         return self.r[a]
 
+    def keys(self):
+        return self.r.keys()
+
     def __repr__(self):
         return "<%s %s>" % (self.__class__.__name__, dict(self.r))
 
