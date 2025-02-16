@@ -279,3 +279,9 @@ class DB:
         if self.conn is not None:
             self.conn.close()
             self.conn = None
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args):
+        self.close()
