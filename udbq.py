@@ -275,6 +275,12 @@ class DB:
             return None
         return stmt.row_type(res)
 
+    def commit(self):
+        self.conn.commit()
+
+    def rollback(self):
+        self.conn.rollback()
+
     def close(self):
         if self.conn is not None:
             self.conn.close()
