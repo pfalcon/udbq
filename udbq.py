@@ -119,6 +119,11 @@ class table:
         self.updates = kwargs
         return self
 
+    def replace(self, **kwargs):
+        self.op = "INSERT OR REPLACE"
+        self.updates = kwargs
+        return self
+
     def update(self, **kwargs):
         self.op = "UPDATE"
         self.updates = kwargs
@@ -216,7 +221,7 @@ class DB:
 
         sql = stmt.op + " "
         vals = []
-        if stmt.op == "INSERT":
+        if stmt.op.startswith("INSERT"):
             cols = stmt.updates.keys()
             sql += " INTO %s(%s) VALUES (%s)" % (tables, ", ".join(cols), ", ".join(["?"] * len(cols)))
             vals = tuple(stmt.updates.values())
@@ -251,7 +256,7 @@ class DB:
 
     def __call__(self, stmt):
         cur = self.execute(stmt)
-        if stmt.op == "INSERT":
+        if stmt.op.startswith("INSERT"):
             id = cur.lastrowid
             cur.close()
             return id
