@@ -49,8 +49,14 @@ class where:
         else:
             keys = []
             for k, v in kwargs.items():
-                keys.append("%s=?" % k)
-                outvals.append(v)
+                if isinstance(v, tuple):
+                    keys.append("%s IN (%s)" % (k, ", ".join(["?"] * len(v))))
+                    outvals.extend(v)
+                elif v is None:
+                    keys.append("%s IS NULL" % k)
+                else:
+                    keys.append("%s=?" % k)
+                    outvals.append(v)
             cond = " AND ".join(keys)
         return cond, outvals
 
