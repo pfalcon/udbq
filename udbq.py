@@ -260,7 +260,12 @@ class DB:
             id = cur.lastrowid
             cur.close()
             return id
-        return ResultSet(cur, stmt.row_type)
+        elif stmt.op == "SELECT":
+            return ResultSet(cur, stmt.row_type)
+        else:
+            r = cur.rowcount
+            cur.close()
+            return r
 
     def first(self, stmt):
         cur = self.execute(stmt)
