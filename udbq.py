@@ -187,8 +187,14 @@ class ResultSet:
         row = self.cur.fetchone()
         if row is None:
             self.cur.close()
+            self.cur = None
             raise StopIteration
         return self.cls(row)
+
+    def close(self):
+        if self.cur:
+            self.cur.close()
+            self.cur = None
 
 
 class DB:
