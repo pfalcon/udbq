@@ -274,3 +274,8 @@ class DB:
         if res is None:
             return None
         return stmt.row_type(res)
+
+    def close(self):
+        if self.conn is not None:
+            self.conn.close()
+            self.conn = None
