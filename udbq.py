@@ -9,7 +9,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2023 Paul Sokolovsky
+# Copyright (c) 2023-2025 Paul Sokolovsky
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -92,6 +92,7 @@ class table:
         self.cols = "*"
         self.cond = None
         self._order_by = ""
+        self._group_by = ""
         self._limit = ""
 
     def copy(self):
@@ -149,6 +150,11 @@ class table:
 
     def or_(self, cond=None, *vals, **kwargs):
         self.cond.or_(cond, *vals, **kwargs)
+        return self
+
+    def group_by(self, *cols):
+        self = self.clone_if()
+        self._group_by = " GROUP BY " + ", ".join(cols)
         return self
 
     def order_by(self, *cols):
@@ -252,6 +258,7 @@ class DB:
             if stmt.cond:
                 sql += " WHERE " + stmt.cond.cond
                 vals += stmt.cond.vals
+            sql += stmt._group_by
             sql += stmt._order_by
             sql += stmt._limit
         _log.debug("%s %s", sql, vals)
