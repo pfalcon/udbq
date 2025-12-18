@@ -104,6 +104,13 @@ class table:
             self.pristine = False
         return self
 
+    def add_table(self, table):
+        """Add table after constructor was called. This is useful when we
+        want to add joining against a table based on some condition (so we
+        construct a base query and then add more tables/joining .where's)."""
+        self.tables += (table,)
+        return self
+
     def left_join(self, table, on_clause):
         self.tables = list(self.tables)
         self.tables[-1] = "%s LEFT JOIN %s ON %s" % (self.tables[-1], table, on_clause)
