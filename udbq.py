@@ -93,6 +93,7 @@ class table:
         self.cond = None
         self._order_by = ""
         self._group_by = ""
+        self._having = None
         self._limit = ""
 
     def copy(self):
@@ -149,6 +150,14 @@ class table:
             self.cond = where(cond, *vals, **kwargs)
         else:
             self.cond.and_(cond, *vals, **kwargs)
+        return self
+
+    def having(self, cond=None, *vals, **kwargs):
+        self = self.clone_if()
+        if self._having is None:
+            self._having = where(cond, *vals, **kwargs)
+        else:
+            self._having.and_(cond, *vals, **kwargs)
         return self
 
     def and_(self, cond=None, *vals, **kwargs):
@@ -266,6 +275,9 @@ class DB:
                 sql += " WHERE " + stmt.cond.cond
                 vals += stmt.cond.vals
             sql += stmt._group_by
+            if stmt._having:
+                sql += " HAVING " + stmt._having.cond
+                vals += stmt._having.vals
             sql += stmt._order_by
             sql += stmt._limit
         _log.debug("%s %s", sql, vals)
