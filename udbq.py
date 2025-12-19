@@ -200,6 +200,45 @@ class table:
             db = self.__db__
         return db.first(self)
 
+    def render(self):
+        tables = ", ".join(self.tables) + " "
+
+        sql = self.op + " "
+        vals = []
+        if self.op.startswith("INSERT"):
+            cols = self.updates.keys()
+            sql += " INTO %s(%s) VALUES (%s)" % (tables, ", ".join(cols), ", ".join(["?"] * len(cols)))
+            vals = tuple(self.updates.values())
+        else:
+            if self.op in ("SELECT", "DELETE"):
+                if self.op == "SELECT":
+                    cols = ", ".join(self.cols)
+                    sql += cols + " "
+                sql += "FROM "
+                sql += tables
+            elif self.op == "UPDATE":
+                sql += tables
+                sql += " SET"
+                comma = False
+                for k, v in self.updates.items():
+                    if comma:
+                        sql += ","
+                    sql += " %s=?" % k
+                    comma = True
+                    vals.append(v)
+            else:
+                raise ValueError(self.op)
+            if self.cond:
+                sql += " WHERE " + self.cond.cond
+                vals += self.cond.vals
+            sql += self._group_by
+            if self._having:
+                sql += " HAVING " + self._having.cond
+                vals += self._having.vals
+            sql += self._order_by
+            sql += self._limit
+        return sql, vals
+
 
 class Model:
     def __init__(self, r):
@@ -248,43 +287,7 @@ class DB:
     def execute(self, stmt):
         if not isinstance(stmt, table):
             raise TypeError("table() clause expected")
-
-        tables = ", ".join(stmt.tables) + " "
-
-        sql = stmt.op + " "
-        vals = []
-        if stmt.op.startswith("INSERT"):
-            cols = stmt.updates.keys()
-            sql += " INTO %s(%s) VALUES (%s)" % (tables, ", ".join(cols), ", ".join(["?"] * len(cols)))
-            vals = tuple(stmt.updates.values())
-        else:
-            if stmt.op in ("SELECT", "DELETE"):
-                if stmt.op == "SELECT":
-                    cols = ", ".join(stmt.cols)
-                    sql += cols + " "
-                sql += "FROM "
-                sql += tables
-            elif stmt.op == "UPDATE":
-                sql += tables
-                sql += " SET"
-                comma = False
-                for k, v in stmt.updates.items():
-                    if comma:
-                        sql += ","
-                    sql += " %s=?" % k
-                    comma = True
-                    vals.append(v)
-            else:
-                raise ValueError(stmt.op)
-            if stmt.cond:
-                sql += " WHERE " + stmt.cond.cond
-                vals += stmt.cond.vals
-            sql += stmt._group_by
-            if stmt._having:
-                sql += " HAVING " + stmt._having.cond
-                vals += stmt._having.vals
-            sql += stmt._order_by
-            sql += stmt._limit
+        sql, vals = stmt.render()
         _log.debug("%s %s", sql, vals)
         cur = self.conn.cursor()
         cur.execute(sql, vals)
