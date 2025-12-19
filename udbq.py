@@ -112,6 +112,11 @@ class table:
         self.tables += (table,)
         return self
 
+    def join(self, table, on_clause):
+        self.tables = list(self.tables)
+        self.tables[-1] = "%s JOIN %s ON %s" % (self.tables[-1], table, on_clause)
+        return self
+
     def left_join(self, table, on_clause):
         self.tables = list(self.tables)
         self.tables[-1] = "%s LEFT JOIN %s ON %s" % (self.tables[-1], table, on_clause)
