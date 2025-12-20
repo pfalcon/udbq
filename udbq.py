@@ -95,6 +95,11 @@ class table:
         self._group_by = ""
         self._having = None
         self._limit = ""
+        self.withs = []
+
+    def with_(self, alias, query):
+        self.withs.append((alias, query))
+        return self
 
     def copy(self):
         return copy.copy(self)
@@ -201,10 +206,24 @@ class table:
         return db.first(self)
 
     def render(self):
+        sql = ""
+        vals = []
+        if self.withs:
+            sql += "WITH "
+            need_comma = False
+            for alias, subq in self.withs:
+                if need_comma:
+                    sql += ", "
+                sub_sql, sub_vals = subq.render()
+                sql += "%s AS (%s) " % (alias, sub_sql)
+                vals += sub_vals
+                need_comma = True
+
         tables = ", ".join(self.tables) + " "
 
-        sql = self.op + " "
-        vals = []
+        if sql:
+            sql += " "
+        sql += self.op + " "
         if self.op.startswith("INSERT"):
             cols = self.updates.keys()
             sql += " INTO %s(%s) VALUES (%s)" % (tables, ", ".join(cols), ", ".join(["?"] * len(cols)))
