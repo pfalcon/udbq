@@ -258,6 +258,11 @@ class table:
             sql += self._limit
         return sql, vals
 
+    def sql(self):
+        sql, vals = self.render()
+        assert not vals
+        return sql
+
 
 class Model:
     def __init__(self, r):
