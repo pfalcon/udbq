@@ -104,7 +104,7 @@ class table:
         return self
 
     def copy(self):
-        return copy.copy(self)
+        return copy.deepcopy(self)
 
     def clone_if(self):
         if self.pristine:
