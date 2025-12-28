@@ -137,6 +137,9 @@ class table:
         self.cols = cols
         return self
 
+    def add_select(self, *cols):
+        self.cols += cols
+
     def insert(self, **kwargs):
         self.op = "INSERT"
         self.updates = kwargs
