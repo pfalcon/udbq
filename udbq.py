@@ -84,9 +84,10 @@ class table:
     def __init__(self, *tables):
         self.pristine = True
         self.row_type = Model
-        if isinstance(tables[0], type):
-            self.row_type = tables[0]
-            tables = tables[1:]
+        if tables:
+            if isinstance(tables[0], type):
+                self.row_type = tables[0]
+                tables = tables[1:]
         self.tables = tables
         self.op = "SELECT"
         self.cols = "*"
@@ -233,8 +234,9 @@ class table:
                 if self.op == "SELECT":
                     cols = ", ".join(self.cols)
                     sql += cols + " "
-                sql += "FROM "
-                sql += tables
+                if self.tables:
+                    sql += "FROM "
+                    sql += tables
             elif self.op == "UPDATE":
                 sql += tables
                 sql += " SET"
