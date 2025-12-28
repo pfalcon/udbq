@@ -97,6 +97,7 @@ class table:
         self._having = None
         self._limit = ""
         self.withs = []
+        self.alias = None
 
     def with_(self, alias, query):
         self.withs.append((alias, query))
@@ -194,6 +195,10 @@ class table:
         self._limit = " LIMIT %d" % n
         return self
 
+    def as_(self, alias):
+        self.alias = alias
+        return self
+
     def exe(self, db=None):
         if db is None:
             db = self.__db__
@@ -232,7 +237,14 @@ class table:
         else:
             if self.op in ("SELECT", "DELETE"):
                 if self.op == "SELECT":
-                    cols = ", ".join(self.cols)
+                    cols = []
+                    for c in self.cols:
+                        if isinstance(c, table):
+                            _sql, _vals = c.render()
+                            c = "(%s) AS %s" % (_sql, c.alias)
+                            vals += _vals
+                        cols.append(c)
+                    cols = ", ".join(cols)
                     sql += cols + " "
                 if self.tables:
                     sql += "FROM "
