@@ -96,6 +96,7 @@ class table:
         self._group_by = ""
         self._having = None
         self._limit = ""
+        self._offset = ""
         self.withs = []
         self.alias = None
 
@@ -198,6 +199,11 @@ class table:
         self._limit = " LIMIT %d" % n
         return self
 
+    def offset(self, n):
+        self = self.clone_if()
+        self._offset = " OFFSET %d" % n
+        return self
+
     def as_(self, alias):
         self.alias = alias
         return self
@@ -273,6 +279,7 @@ class table:
                 vals += self._having.vals
             sql += self._order_by
             sql += self._limit
+            sql += self._offset
         return sql, vals
 
     def sql(self):
