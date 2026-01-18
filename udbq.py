@@ -265,9 +265,13 @@ class table:
                 for k, v in self.updates.items():
                     if comma:
                         sql += ","
-                    sql += " %s=?" % k
+                    if isinstance(v, tuple):
+                        sql += " %s=%s" % (k, v[0])
+                        vals.extend(v[1:])
+                    else:
+                        sql += " %s=?" % k
+                        vals.append(v)
                     comma = True
-                    vals.append(v)
             else:
                 raise ValueError(self.op)
             if self.cond:
