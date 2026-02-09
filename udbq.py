@@ -371,6 +371,9 @@ class DB:
         cur.execute(sql, vals)
         return cur
 
+    def begin(self):
+        self.rawsql("BEGIN")
+
     def commit(self):
         self.conn.commit()
 
