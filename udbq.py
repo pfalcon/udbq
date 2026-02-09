@@ -366,6 +366,11 @@ class DB:
             return None
         return stmt.row_type(res)
 
+    def rawsql(self, sql, vals=()):
+        cur = self.conn.cursor()
+        cur.execute(sql, vals)
+        return cur
+
     def commit(self):
         self.conn.commit()
 
