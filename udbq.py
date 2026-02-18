@@ -333,6 +333,11 @@ class ResultSet:
 
 class DB:
     def __init__(self, dburn):
+        self.conn = None
+        self.open(dburn)
+
+    def open(self, dburn):
+        self.close()
         self.conn = sqlite3.connect(dburn)
         self.conn.row_factory = sqlite3.Row
 
