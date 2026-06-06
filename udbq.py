@@ -44,8 +44,13 @@ class where:
         if cond is not None and kwargs:
             raise TypeError("Use either textual condition or kwargs")
         if cond is not None:
-            cond += " ?"  * len(vals)
-            outvals.extend(vals)
+            if cond.endswith(" IN"):
+                assert len(vals) == 1
+                cond += " (%s)" % ", ".join(["?"] * len(vals[0]))
+                outvals.extend(vals[0])
+            else:
+                cond += " ?"  * len(vals)
+                outvals.extend(vals)
         else:
             keys = []
             for k, v in kwargs.items():
