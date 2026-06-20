@@ -54,7 +54,7 @@ class where:
         else:
             keys = []
             for k, v in kwargs.items():
-                if isinstance(v, (tuple, list)):
+                if isinstance(v, (tuple, list, set)):
                     keys.append("%s IN (%s)" % (k, ", ".join(["?"] * len(v))))
                     outvals.extend(v)
                 elif v is None:
