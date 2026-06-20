@@ -347,9 +347,16 @@ class DB:
         self.conn.row_factory = sqlite3.Row
 
     def execute(self, stmt):
-        if not isinstance(stmt, table):
+        if isinstance(stmt, table):
+            sql, vals = stmt.render()
+        elif isinstance(stmt, str):
+            sql = stmt
+            vals = ()
+        elif isinstance(stmt, tuple):
+            sql = stmt[0]
+            vals = stmt[1:]
+        else:
             raise TypeError("table() clause expected")
-        sql, vals = stmt.render()
         _log.debug("%s %s", sql, vals)
         cur = self.conn.cursor()
         cur.execute(sql, vals)
@@ -357,6 +364,8 @@ class DB:
 
     def __call__(self, stmt):
         cur = self.execute(stmt)
+        if isinstance(stmt, (str, tuple)):
+            return ResultSet(cur, Model)
         if stmt.op.startswith("INSERT"):
             id = cur.lastrowid
             cur.close()
