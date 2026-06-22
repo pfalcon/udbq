@@ -104,9 +104,18 @@ class table:
         self._offset = ""
         self.withs = []
         self.alias = None
+        self.set_ops = []
 
     def with_(self, alias, query):
         self.withs.append((alias, query))
+        return self
+
+    def union(self, query):
+        self.set_ops.append(("UNION", query))
+        return self
+
+    def union_all(self, query):
+        self.set_ops.append(("UNION ALL", query))
         return self
 
     def copy(self):
@@ -289,6 +298,13 @@ class table:
             sql += self._order_by
             sql += self._limit
             sql += self._offset
+
+        for set_op, set_q in self.set_ops:
+            sql += " %s " % set_op
+            sql2, vals2 = set_q.render()
+            sql += sql2
+            vals += vals2
+
         return sql, vals
 
     def sql(self):
