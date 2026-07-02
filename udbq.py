@@ -66,7 +66,11 @@ class where:
         return cond, outvals
 
     def __init__(self, cond=None, *vals, **kwargs):
-        self.cond, self.vals = self.render_clause(cond, *vals, **kwargs)
+        if isinstance(cond, where):
+            self.cond = cond.cond
+            self.vals = cond.vals
+        else:
+            self.cond, self.vals = self.render_clause(cond, *vals, **kwargs)
 
     def _connect(self, op, cond=None, *vals, **kwargs):
         if isinstance(cond, where):
