@@ -159,9 +159,15 @@ class table:
     def add_select(self, *cols):
         self.cols += cols
 
-    def insert(self, **kwargs):
+    def insert(self, *cols, select=None, **kwargs):
+        if cols or select:
+            assert not kwargs
         self.op = "INSERT"
-        self.updates = kwargs
+        if select is not None:
+            self.cols = cols
+            self.updates = select
+        else:
+            self.updates = kwargs
         return self
 
     def replace(self, **kwargs):
@@ -258,9 +264,15 @@ class table:
             sql += " "
         sql += self.op + " "
         if self.op.startswith("INSERT"):
-            cols = self.updates.keys()
-            sql += " INTO %s(%s) VALUES (%s)" % (tables, ", ".join(cols), ", ".join(["?"] * len(cols)))
-            vals = tuple(self.updates.values())
+            if isinstance(self.updates, table):
+                cols = self.cols
+                sub_sql, sub_vals = self.updates.render()
+                sql += " INTO %s(%s) %s" % (tables, ", ".join(cols), sub_sql)
+                vals = sub_vals
+            else:
+                cols = self.updates.keys()
+                sql += " INTO %s(%s) VALUES (%s)" % (tables, ", ".join(cols), ", ".join(["?"] * len(cols)))
+                vals = tuple(self.updates.values())
         else:
             if self.op in ("SELECT", "DELETE"):
                 if self.op == "SELECT":
