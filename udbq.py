@@ -371,6 +371,7 @@ class ResultSet:
 class DB:
     def __init__(self, dburn):
         self.conn = None
+        self.dry_run = False
         self.open(dburn)
 
     def open(self, dburn):
@@ -422,13 +423,26 @@ class DB:
         cur.execute(sql, vals)
         return cur
 
+    def dry_run_mode(self):
+        self.begin()
+        self.dry_run = True
+        _log.warning("Entering DB dry-run mode (no changes are committed/persisted)")
+
     def begin(self):
+        if self.dry_run:
+            return
         self.rawsql("BEGIN")
 
     def commit(self):
+        if self.dry_run:
+            _log.warning("commit() ignored in dry-run mode")
+            return
         self.conn.commit()
 
     def rollback(self):
+        if self.dry_run:
+            _log.warning("rollback() ignored in dry-run mode")
+            return
         self.conn.rollback()
 
     def close(self):
