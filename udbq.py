@@ -437,7 +437,11 @@ class DB:
             self.conn = None
 
     def __enter__(self):
-        return self
+        return self.begin()
 
-    def __exit__(self, *args):
-        self.close()
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        if exc_type is not None:
+            self.rollback()
+            # Propagate the exception
+            return False
+        self.commit()
